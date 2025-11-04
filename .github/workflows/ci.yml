@@ -60,7 +60,7 @@ jobs:
           exit 1
       - name: Upload audit artifact (always)
         if: always() && steps.audit.outputs.high_or_critical != '' && github.actor != 'nektos/act'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
         with:
           name: npm-audit
           path: audit.json
@@ -73,7 +73,7 @@ jobs:
           fi
       - name: Upload coverage report
         if: always() && github.actor != 'nektos/act'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
         with:
           name: coverage-html
           path: coverage/lcov-report
