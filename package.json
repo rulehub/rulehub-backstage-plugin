@@ -1,0 +1,192 @@
+{
+  "name": "@rulehub/rulehub-backstage-plugin",
+  "version": "0.1.0",
+  "description": "Backstage frontend plugin that displays a policy/compliance catalog from a static JSON index.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rulehub/rulehub-backstage-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rulehub/rulehub-backstage-plugin/issues"
+  },
+  "homepage": "https://github.com/rulehub/rulehub-backstage-plugin#readme",
+  "author": "Rulehub <dev404ai@gmail.com> (https://github.com/rulehub)",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "backstage",
+    "backstage-plugin",
+    "plugin",
+    "frontend",
+    "policy",
+    "catalog",
+    "compliance",
+    "rulehub"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && NODE_ENV=production tsup --config tsup.config.ts",
+    "build:watch": "tsup --config tsup.config.ts --watch",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "test": "jest --runInBand",
+    "test:ci": "jest --runInBand --coverage",
+    "test:dev": "SKIP_COVERAGE=1 jest --runInBand",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint -c ./eslint.config.mjs 'src/**/*.{ts,tsx}'",
+    "lint:fix": "eslint -c ./eslint.config.mjs 'src/**/*.{ts,tsx}' --fix",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run api:check",
+    "verify:full": "npm run lint && npm run typecheck && npm run format:check && npm test -- --coverage && npm run size && npm run spec:descriptor && npm run health:react:ci",
+    "size": "npm run build && size-limit",
+    "api:check": "npm run build && api-extractor run --local",
+    "api:check:strict": "npm run build && api-extractor run --local --diagnostics",
+    "prepublishOnly": "npm run build",
+    "install:in-app": "node scripts/install-in-backstage.mjs",
+    "dev:backstage": "node scripts/dev-setup-backstage.mjs",
+    "spec:descriptor": "node scripts/spec-descriptor-check.js",
+    "health:react": "node scripts/check-react-singleton.mjs",
+    "health:react:ci": "HEALTH_ALLOW_LOCAL=1 HEALTH_SKIP_TMP=1 node scripts/check-react-singleton.mjs",
+    "demo": "npm run build && node scripts/demo-real.mjs",
+    "demo:front": "npm run build && node scripts/demo-real.mjs --frontend-only",
+    "e2e": "playwright test -c e2e/playwright.config.ts",
+    "e2e:headed": "playwright test -c e2e/playwright.config.ts --headed",
+    "e2e:reuse": "PLAYWRIGHT_NO_SERVER=1 playwright test -c e2e/playwright.config.ts",
+    "e2e:smoke": "playwright test -c e2e/playwright.config.ts e2e/tests/rulehub.spec.ts",
+    "e2e:smoke:reuse": "PLAYWRIGHT_NO_SERVER=1 playwright test -c e2e/playwright.config.ts e2e/tests/rulehub.spec.ts",
+    "demo:stop": "pkill -f 'backstage-cli repo start' || true",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1"
+  },
+  "peerDependencies": {
+    "@backstage/core-components": ">=0.13.0 <1.0.0",
+    "@backstage/core-plugin-api": ">=1.9.0 <2.0.0",
+    "react": ">=18 <19",
+    "react-dom": ">=18 <19"
+  },
+  "devDependencies": {
+    "@backstage/config": "^1.3.0",
+    "@backstage/core-app-api": "^1.13.0",
+    "@backstage/core-components": "^0.18.1",
+    "@backstage/core-plugin-api": "^1.11.0",
+    "@microsoft/api-extractor": "^7.28.0",
+    "@playwright/test": "^1.48.2",
+    "@size-limit/file": "^8.0.0",
+    "@testing-library/dom": "^10.0.0",
+    "@testing-library/jest-dom": "^6.4.6",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/parser": "^8.40.0",
+    "esbuild": "^0.25.11",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.3.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "size-limit": "^8.0.0",
+    "ts-jest": "^29.2.3",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.4",
+    "yaml": "^2.6.0"
+  },
+  "size-limit": [
+    {
+      "name": "main ESM",
+      "path": "dist/index.mjs",
+      "limit": "12 KB",
+      "gzip": true
+    },
+    {
+      "name": "main CJS",
+      "path": "dist/index.js",
+      "limit": "14 KB",
+      "gzip": true
+    }
+  ],
+  "overrides": {
+    "prismjs": ">=1.30.0",
+    "refractor": {
+      "prismjs": ">=1.30.0"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/tests/**",
+    "media"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "backstage": {
+    "role": "frontend-plugin"
+  },
+  "configSchema": {
+    "value": {
+      "type": "object",
+      "properties": {
+        "rulehub": {
+          "type": "object",
+          "properties": {
+            "indexUrl": {
+              "type": "string",
+              "visibility": "frontend",
+              "description": "URL to the RuleHub plugin index JSON. Default is the official hosted charts index: https://rulehub.github.io/rulehub-charts/plugin-index/index.json."
+            },
+            "links": {
+              "type": "object",
+              "properties": {
+                "repoBaseUrl": {
+                  "type": "string",
+                  "visibility": "frontend",
+                  "description": "Base URL for repository links; e.g., https://github.com/rulehub/rulehub/tree/main/"
+                },
+                "sourceBaseUrl": {
+                  "type": "string",
+                  "visibility": "frontend",
+                  "description": "Base URL for Source (engine) links; typically the charts repo (e.g., https://github.com/rulehub/rulehub-charts/tree/main/)."
+                },
+                "perId": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "visibility": "frontend",
+                  "description": "Optional per-id repo path or URL overrides."
+                },
+                "perIdJson": {
+                  "type": "string",
+                  "visibility": "frontend",
+                  "description": "JSON string form of per-id map; useful when YAML escaping is undesirable."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

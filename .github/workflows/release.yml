@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  resolve-ci-image:
+    name: Resolve CI image
+    uses: rulehub/rulehub/.github/workflows/resolve-ci-image.yml@main
+    with:
+      kind: frontend
+
+  publish:
+    needs: [resolve-ci-image]
+    runs-on: ubuntu-latest
+    container:
+      # Image resolved via reusable workflow; falls back to CI_IMAGE_TAG or act defaults.
+      image: "${{ needs.resolve-ci-image.outputs.image }}"
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - name: Set npm registry
+        run: npm config set registry https://registry.npmjs.org
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+      - run: npm ci
+      - run: npm run verify:full
+      - run: npm run build
+      - name: Publish to npm (with provenance)
+        if: ${{ github.actor != 'nektos/act' }}
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

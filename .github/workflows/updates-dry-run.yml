@@ -1,0 +1,55 @@
+name: updates-dry-run
+
+on:
+  workflow_dispatch:
+  # Temporary: also trigger on push to main to avoid 'skipped' appearance; job will noop on push
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  noop-on-push:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: No-op summary
+        run: |
+          echo "updates-dry-run: noop on push (manual-only workflow)" >> "$GITHUB_STEP_SUMMARY"
+
+  renovate-dry-run:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/renovatebot/renovate:41
+      options: --user 0:0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+
+      - name: Run Renovate (dry-run, local platform)
+        env:
+          LOG_LEVEL: info
+          RENOVATE_DRY_RUN: lookup
+          GITHUB_COM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: sh scripts/ci/renovate-dry-run.sh
+
+      - name: Show summary (act-friendly)
+        if: ${{ always() }}
+        run: |
+          echo "---- Renovate Summary ----"
+          [ -f dist/renovate-summary.txt ] && cat dist/renovate-summary.txt || true
+          echo "---- Renovate Log (last 200 lines) ----"
+          [ -f dist/renovate.log ] && tail -n 200 dist/renovate.log || true
+
+      - name: Upload dry-run report
+        if: ${{ always() && github.actor != 'nektos/act' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: renovate-dry-run
+          path: |
+            dist/renovate.log
+            dist/renovate.print-config.json
+            dist/renovate-summary.txt

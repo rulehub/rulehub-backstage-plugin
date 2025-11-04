@@ -1,0 +1,17 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "mainEntryPointFilePath": "./dist/index.d.ts",
+  "dtsRollup": {
+    "enabled": true,
+    "untrimmedFilePath": "./dist/index.api.d.ts"
+  },
+  "apiReport": {
+    "enabled": true,
+    "reportFolder": "./api-report",
+    "reportFileName": "rulehub-backstage-plugin.api.md",
+    "reportTempFolder": "./tmp/api-extractor"
+  },
+  "docModel": {
+    "enabled": false
+  }
+}

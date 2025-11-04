@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  resolve-ci-image:
+    name: Resolve CI image
+    uses: rulehub/rulehub/.github/workflows/resolve-ci-image.yml@main
+    with:
+      kind: frontend
+
+  build-test:
+    needs: [resolve-ci-image]
+    runs-on: ubuntu-latest
+    # Run inside shared CI image to centralize tooling (Node 20, jq, etc.)
+    container:
+      # Image resolved via reusable workflow; falls back to CI_IMAGE_TAG or act defaults.
+      image: "${{ needs.resolve-ci-image.outputs.image }}"
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test -- --coverage
+      - run: npm run build
+      - name: Bundle size check
+        run: npm run size
+      - name: API surface check (golden-file enforced)
+        run: npm run api:check:strict
+      - name: React health check
+        run: npm run health:react:ci
+      - name: Production dependency audit (fail on high/critical)
+        id: audit
+        continue-on-error: true
+        run: |
+          bash scripts/ci/npm-audit.sh
+      - name: Fail if high / critical vulnerabilities present
+        if: steps.audit.outputs.high_or_critical != '0'
+        run: |
+          echo "High / Critical vulnerabilities detected (count=${{ steps.audit.outputs.high_or_critical }})." >&2
+          exit 1
+      - name: Upload audit artifact (always)
+        if: always() && steps.audit.outputs.high_or_critical != '' && github.actor != 'nektos/act'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: npm-audit
+          path: audit.json
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f audit.json ]; then
+            echo '\n### Audit Summary' >> $GITHUB_STEP_SUMMARY
+            cat audit.json | jq '.metadata.vulnerabilities' >> $GITHUB_STEP_SUMMARY
+          fi
+      - name: Upload coverage report
+        if: always() && github.actor != 'nektos/act'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: coverage-html
+          path: coverage/lcov-report

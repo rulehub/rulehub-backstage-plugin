@@ -1,0 +1,33 @@
+rulehub:
+  # Where the plugin fetches the catalog index from.
+  # Official hosted index (GitHub Pages).
+  # We use both official sites in this config:
+  # - indexUrl below points to 'rulehub-charts' (recommended for freshness)
+  # - deep-link bases below use 'rulehub' (core) and 'rulehub-charts' concurrently
+  indexUrl: https://rulehub.github.io/rulehub-charts/plugin-index/index.json
+  # Equivalent index host (core repo). Either host serves the same index file if you prefer it:
+  # indexUrl: https://rulehub.github.io/rulehub/plugin-index/index.json
+
+  # Deterministic pinning options:
+  # - Pin to a tag/commit via jsDelivr (deterministic builds):
+  # Self-hosting examples (use your own URL if self-hosting):
+  #     https://cdn.jsdelivr.net/gh/rulehub/rulehub-charts@v0.1.0/plugin-index/index.json
+  #     https://cdn.jsdelivr.net/gh/rulehub/rulehub-charts@<commit-sha>/plugin-index/index.json
+
+  # Optional deep-link bases. These improve determinism of links in the table.
+  links:
+    # ID/Name columns link to your core repo (policies, docs, etc.)
+    # You may provide GitHub Pages index.json URLs here — the plugin will normalize them to
+    # the correct GitHub tree bases for actual links.
+    repoBaseUrl: https://rulehub.github.io/rulehub/plugin-index/index.json
+
+    # "Source" column (Kyverno/Gatekeeper) links typically point to the charts repository.
+    # You can also use the hosted index.json; it will be normalized to the charts GitHub tree.
+    sourceBaseUrl: https://rulehub.github.io/rulehub-charts/plugin-index/index.json
+
+    # Optional explicit mapping when an id does not match the <prefix>.<suffix> heuristic.
+    # perId:
+    #   cis-1: policies/k8s/cis-1
+  #   iso-27001: https://github.com/rulehub/rulehub/tree/main/policies/iso/iso-27001
+---
+# Place this file snippet into your Backstage app-config.local.yaml and adjust URLs if you forked repos.
