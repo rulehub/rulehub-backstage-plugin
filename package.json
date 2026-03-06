@@ -1,6 +1,6 @@
 {
   "name": "@rulehub/rulehub-backstage-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Backstage frontend plugin that displays a policy/compliance catalog from a static JSON index.",
   "repository": {
     "type": "git",
