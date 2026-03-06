@@ -23,14 +23,7 @@ describe('RulehubPage perIdJson invalid JSON handling', () => {
     const { RulehubPage } = await import('../src/routes');
 
     // Set invalid JSON in perIdJson query param; setupTests suppresses the expected warning
-    const url = new URL('http://localhost/?perIdJson=%7Binvalid');
-    Object.defineProperty(window, 'location', {
-      value: {
-        href: url.toString(),
-        search: url.search,
-      },
-      writable: true,
-    } as any);
+    window.history.replaceState({}, '', '/?perIdJson=%7Binvalid');
 
     render(<RulehubPage />);
 

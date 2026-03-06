@@ -54,7 +54,7 @@ Turn your policies into a clean, searchable catalog inside Backstage — with ze
   - charts: `https://rulehub.github.io/rulehub-charts/plugin-index/index.json`
   - core: `https://rulehub.github.io/rulehub/plugin-index/index.json`
 
-Open /rulehub ind your Backstage app.
+Open /rulehub in your Backstage app.
 
 For end-to-end setup, index generation, and advanced integration patterns, see the full guide in `docs/DETAILED_GUIDE.md`.
 

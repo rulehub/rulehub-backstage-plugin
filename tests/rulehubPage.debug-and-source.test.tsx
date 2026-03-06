@@ -13,16 +13,8 @@ const mockInstance = { getIndex: mockGetIndex };
 describe('RulehubPage debug and source links', () => {
   beforeEach(() => {
     mockGetIndex.mockReset();
-    // Ensure debug flag is enabled via query param
-    const url = new URL('http://localhost/?debug=1');
-    // jsdom allows overriding location via defineProperty
-    Object.defineProperty(window, 'location', {
-      value: {
-        href: url.toString(),
-        search: url.search,
-      },
-      writable: true,
-    } as any);
+    // Drive query params through history instead of redefining window.location.
+    window.history.replaceState({}, '', '/?debug=1');
   });
 
   it('renders repo base in debug mode and source links from paths', async () => {
@@ -45,11 +37,11 @@ describe('RulehubPage debug and source links', () => {
 
     render(<RulehubPage />);
 
-  // Debug section should appear with both repo and source bases
-  expect(await screen.findByTestId('repo-base')).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: /open repo base/i })).toBeInTheDocument();
-  expect(await screen.findByTestId('source-base')).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: /open source base/i })).toBeInTheDocument();
+    // Debug section should appear with both repo and source bases
+    expect(await screen.findByTestId('repo-base')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open repo base/i })).toBeInTheDocument();
+    expect(await screen.findByTestId('source-base')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open source base/i })).toBeInTheDocument();
 
     // Source links should render both engines from derived paths
     const source = await screen.findByTestId('source-links');
